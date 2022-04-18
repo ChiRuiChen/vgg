@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 
       //hls-fpga-machine-learning insert data
       hls::stream<input_t> input_1("input_1");
-      nnet::copy_data<float, input_t, 0, N_INPUT_1_1*N_INPUT_2_1*N_INPUT_3_1>(in, input_1);
+      nnet::copy_data_me<float, input_t, 0, N_INPUT_1_1*N_INPUT_2_1*N_INPUT_3_1>(in, input_1);
       hls::stream<result_t> layer32_out("layer32_out");
 
       //hls-fpga-machine-learning insert top-level-function
@@ -119,35 +119,17 @@ int main(int argc, char **argv)
         std::cout << std::endl;
         std::cout << "Quantized predictions" << std::endl;
         //hls-fpga-machine-learning insert quantized
-        nnet::print_result<result_t, OUT_HEIGHT_32*OUT_WIDTH_32*N_FILT_32>(layer32_out, std::cout, true);
+        nnet::print_result_me<result_t, OUT_HEIGHT_32*OUT_WIDTH_32*N_FILT_32>(layer32_out, std::cout, true);
       }
       e++;
 
       //hls-fpga-machine-learning insert tb-output
-      nnet::print_result<result_t, OUT_HEIGHT_32*OUT_WIDTH_32*N_FILT_32>(layer32_out, fout);
+      nnet::print_result_me<result_t, OUT_HEIGHT_32*OUT_WIDTH_32*N_FILT_32>(layer32_out, fout);
 
     }
     fin.close();
     fpr.close();
-  } else {
-    std::cout << "INFO: Unable to open input/predictions file, using default input." << std::endl;
-
-    //hls-fpga-machine-learning insert zero
-    hls::stream<input_t> input_1("input_1");
-    nnet::fill_zero<input_t, N_INPUT_1_1*N_INPUT_2_1*N_INPUT_3_1>(input_1);
-    hls::stream<result_t> layer32_out("layer32_out");
-
-    //hls-fpga-machine-learning insert top-level-function
-    unsigned short size_in1,size_out1;
-    myproject(input_1,layer32_out,w2,b2,w4,b4,w7,b7,w9,b9,w12,b12,w14,b14,w16,b16,w19,b19,w21,b21,w23,b23,w26,b26,w28,b28,w30,b30,size_in1,size_out1);
-
-    //hls-fpga-machine-learning insert output
-    nnet::print_result<result_t, OUT_HEIGHT_32*OUT_WIDTH_32*N_FILT_32>(layer32_out, std::cout, true);
-
-    //hls-fpga-machine-learning insert tb-output
-    nnet::print_result<result_t, OUT_HEIGHT_32*OUT_WIDTH_32*N_FILT_32>(layer32_out, fout);
-
-  }
+  } 
 
   fout.close();
   std::cout << "INFO: Saved inference results to file: " << RESULTS_LOG << std::endl;

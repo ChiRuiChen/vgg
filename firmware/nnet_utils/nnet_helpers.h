@@ -301,6 +301,19 @@ void copy_data(std::vector<src_T> src, hls::stream<dst_T> &dst) {
 }
 
 template<class src_T, class dst_T, size_t OFFSET, size_t SIZE>
+void copy_data_me(std::vector<src_T> src, hls::stream<dst_T> &dst) {
+    typename std::vector<src_T>::const_iterator in_begin = src.cbegin() + OFFSET;
+    typename std::vector<src_T>::const_iterator in_end = in_begin + SIZE;
+
+    dst_T dst_pack;
+    for (typename std::vector<src_T>::const_iterator i = in_begin; i != in_end; ++i) {
+        dst_pack = dst_T(*i);
+        dst.write(dst_pack);
+    }
+}
+
+
+template<class src_T, class dst_T, size_t OFFSET, size_t SIZE>
 void copy_data_axi(std::vector<src_T> src, dst_T dst[SIZE]) {
     for(auto i = 0; i < SIZE; i++)
     	if(i == SIZE - 1)
@@ -322,6 +335,18 @@ void print_result(res_T result[SIZE], std::ostream &out, bool keep = false) {
     }
     out << std::endl;
 }
+
+template<class res_T, size_t SIZE>
+void print_result_me(hls::stream<res_T> &result, std::ostream &out, bool keep = false) {
+    for(int i = 0; i < SIZE; i++) {
+        res_T res_pack = result.read();
+        out << res_pack << " ";
+        if (keep) result.write(res_pack);
+		if(i == 255)out << std::endl;
+    }
+}
+
+
 
 template<class res_T, size_t SIZE>
 void print_result(hls::stream<res_T> &result, std::ostream &out, bool keep = false) {
